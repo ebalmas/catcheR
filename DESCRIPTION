@@ -1,0 +1,39 @@
+Package: catcheR
+Type: Package
+Title: Plasmid Library Sequencing Analysis for shRNA CATCHER Experiments
+Version: 0.1.0
+Date: 2026-05-17
+Authors@R: person("Elisa", "Balmas",
+    email = "elisa.balmas@unito.it",
+    role  = c("aut", "cre"))
+Description: End-to-end quality control and analysis of shRNA plasmid library
+    sequencing data produced by the CATCHER protocol. Wraps the corrected
+    Python extraction script (plasmid_final_corrected.py) and provides R
+    functions for single-library QC, two-library comparison, birthday-problem
+    duplicate estimation, and publication-ready plot generation.
+    Key concepts: Barcode (BC) identifies the shRNA; UCI (Unique Clone
+    Identifier) identifies the bacterial colony of origin; DIs (Distinct
+    Integrations) is a read-depth threshold that filters sequencing artefacts.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends:
+    R (>= 4.0.0)
+Imports:
+    ggplot2 (>= 3.4.0),
+    dplyr   (>= 1.1.0),
+    tidyr   (>= 1.3.0),
+    scales  (>= 1.2.0),
+    forcats (>= 1.0.0)
+Suggests:
+    patchwork,
+    data.table,
+    devtools,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+URL: https://github.com/your-lab/catcheR
+BugReports: https://github.com/your-lab/catcheR/issues
