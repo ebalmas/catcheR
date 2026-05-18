@@ -17,7 +17,7 @@ install.packages(c("ggplot2", "dplyr", "tidyr", "scales",
 install.packages("devtools")
 
 # Install catcheR from the local folder
-devtools::install("path/to/catcheR")
+devtools::install_github("ebalmas/catcheR")
 ```
 
 ## Quick start
