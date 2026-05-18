@@ -35,5 +35,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://github.com/your-lab/catcheR
-BugReports: https://github.com/your-lab/catcheR/issues
+URL: https://github.com/ebalmas/catcheR
+BugReports: https://github.com/ebalmas/catcheR/issues
