@@ -57,7 +57,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' result <- run_plasmid_QC(
+#' result <- catcheR_step2QC_plasmidQC(
 #'   results_dir      = "CATCHER1_new/results/",
 #'   DIs              = 300,
 #'   transfect_clones = 100,
@@ -72,7 +72,7 @@
 #'
 #' @seealso [run_extraction()], [run_combined_QC()], [run_plasmid_plots()]
 #' @export
-run_plasmid_QC <- function(results_dir      = "results/",
+catcheR_step2QC_plasmidQC <- function(results_dir      = "results/",
                             DIs              = 300,
                             transfect_clones = 100,
                             transfect_cells  = 2000000,
@@ -82,7 +82,7 @@ run_plasmid_QC <- function(results_dir      = "results/",
   eff <- transfect_clones / transfect_cells
 
   message("=============================================================")
-  message("  catcheR::run_plasmid_QC()")
+  message("  catcheR::rcatcheR_step2QC_plasmidQC()")
   message("=============================================================")
   message(sprintf("  Results dir        : %s", results_dir))
   message(sprintf("  DIs                : %d", DIs))
