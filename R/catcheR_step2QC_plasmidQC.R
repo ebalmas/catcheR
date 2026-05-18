@@ -70,7 +70,7 @@
 #' result$shrna
 #' }
 #'
-#' @seealso [run_extraction()], [run_combined_QC()], [run_plasmid_plots()]
+#' @seealso [catcheR_step2QC_extraction()], [catcheR_step2QC_combinedQC()], [catcheR_step2QC_plots()]
 #' @export
 catcheR_step2QC_plasmidQC <- function(results_dir      = "results/",
                             DIs              = 300,
