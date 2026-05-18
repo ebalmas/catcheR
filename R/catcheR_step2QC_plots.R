@@ -51,7 +51,7 @@ catcheR_step2QC_plots <- function(results_dir = "results/",
          call. = FALSE)
 
   message("=============================================================")
-  message("  catcheR::run_plasmid_plots()")
+  message("  catcheR::catcheR_step2QC_plots()")
   message("=============================================================")
   message(sprintf("  Results dir  : %s", results_dir))
   message(sprintf("  DIs threshold: %d", DIs))
