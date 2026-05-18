@@ -1,6 +1,8 @@
 # catcheR
 
-**C**lone **A**nalysis of **T**ranscriptomic **C**onjugated **H**airpin **E**lement **R**eads
+## Clonality And Treatment Controlled sHrna Effect findeR
+iPS2-seq updated pipeline for our new ligation based technology
+updated version from https://github.com/alessandro-bertero/catcheR
 
 End-to-end R package for analysing shRNA plasmid library sequencing data.
 
@@ -24,7 +26,7 @@ devtools::install("path/to/catcheR")
 library(catcheR)
 
 # Step 1 — extract clones from FASTQ (calls Python internally)
-run_extraction(
+catcheR_step2QC_extraction(
   fastq      = "your_file.fastq",
   barcodes   = "rc_barcodes_genes.csv",
   output_dir = "results/",
@@ -32,7 +34,7 @@ run_extraction(
 )
 
 # Step 2 — single-library QC
-run_plasmid_QC(
+catcheR_step2QC_plasmidQC(
   results_dir      = "results/",
   DIs              = 300,
   transfect_clones = 100,
@@ -41,7 +43,7 @@ run_plasmid_QC(
 )
 
 # Step 3 — compare two libraries
-run_combined_QC(
+catcheR_step2QC_combinedQC(
   lib1_dir = "CATCHER1/results/",
   lib2_dir = "CATCHER2/results/",
   out_dir  = "combined_results/",
@@ -52,7 +54,7 @@ run_combined_QC(
 )
 
 # Step 4 — publication plots
-run_plasmid_plots("results/", DIs = 300)
+catcheR_step2QC_plots("results/", DIs = 300)
 ```
 
 ## Requirements
@@ -65,7 +67,7 @@ run_plasmid_plots("results/", DIs = 300)
 
 | Function | Description |
 |---|---|
-| `run_extraction()` | Calls bundled Python script to extract UMI/BC/UCI from FASTQ |
-| `run_plasmid_QC()` | Single-library QC + birthday-problem analysis |
-| `run_combined_QC()` | Two-library comparison + go/no-go report |
-| `run_plasmid_plots()` | Publication-ready distribution and QC plots |
+| `catcheR_step2QC_extraction()` | Calls bundled Python script to extract UMI/BC/UCI from FASTQ |
+| `rcatcheR_step2QC_plasmidQC()` | Single-library QC + birthday-problem analysis |
+| `run_combinedQC()` | Two-library comparison + go/no-go report |
+| `catcheR_step2QC_plots()` | Publication-ready distribution and QC plots |
