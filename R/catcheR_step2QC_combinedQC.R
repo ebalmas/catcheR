@@ -59,7 +59,7 @@
 #' result$overall_go   # TRUE = proceed, FALSE = no-go
 #' }
 #'
-#' @seealso [run_extraction()], [run_plasmid_QC()], [run_plasmid_plots()]
+#' @seealso [catcheR_step2QC_extraction()], [catcheR_step2QC_plasmidQC()], [catcheR_step2QC_plots()]
 #' @export
 catcheR_step2QC_combinedQC <- function(lib1_dir         = "CATCHER1/results/",
                              lib2_dir         = "CATCHER2/results/",
