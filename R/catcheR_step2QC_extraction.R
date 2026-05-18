@@ -49,7 +49,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' run_extraction(
+#' catcheR_step2QC_extraction(
 #'   fastq      = "EB003CS1_KS7_1_finalQC_S1_L001_R1_001.fastq",
 #'   barcodes   = "rc_barcodes_genes.csv",
 #'   output_dir = "results/",
