@@ -61,7 +61,7 @@
 #'
 #' @seealso [run_extraction()], [run_plasmid_QC()], [run_plasmid_plots()]
 #' @export
-run_combined_QC <- function(lib1_dir         = "CATCHER1/results/",
+catcheR_step2QC_combinedQC <- function(lib1_dir         = "CATCHER1/results/",
                              lib2_dir         = "CATCHER2/results/",
                              out_dir          = "combined_results/",
                              lib1_name        = "CATCHER1",
@@ -75,7 +75,7 @@ run_combined_QC <- function(lib1_dir         = "CATCHER1/results/",
   eff <- transfect_clones / transfect_cells
 
   message("=============================================================")
-  message("  catcheR::run_combined_QC()")
+  message("  catcheR::catcheR_step2QC_combinedQC()")
   message("=============================================================")
   message(sprintf("  Library 1 : %s  (%s)", lib1_name, lib1_dir))
   message(sprintf("  Library 2 : %s  (%s)", lib2_name, lib2_dir))
