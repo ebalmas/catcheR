@@ -43,7 +43,7 @@ devtools::install("path/to/catcheR")
 ```{r step1}
 library(catcheR)
 
-run_extraction(
+catcheR_step2QC_extraction(
   fastq      = "EB003CS1_KS7_1_finalQC_S1_L001_R1_001.fastq",
   barcodes   = "rc_barcodes_genes.csv",
   output_dir = "CATCHER1_new/results/",
@@ -51,7 +51,7 @@ run_extraction(
 )
 ```
 
-`run_extraction()` calls the bundled Python script
+`catcheR_step2QC_extraction()` calls the bundled Python script
 `plasmid_final_corrected.py`, which extracts the barcode (pos 34–41)
 and UCI (pos 42–47) from every read, matches barcodes against the
 reference CSV, and writes `distribution_all_clones.csv` plus supporting
@@ -60,7 +60,7 @@ files to `output_dir`.
 ## Step 2 — Single-library QC
 
 ```{r step2}
-qc <- run_plasmid_QC(
+qc <- catcheR_step2QC_plasmidQC(
   results_dir      = "CATCHER1_new/results/",
   DIs              = 300,
   transfect_clones = 100,       # clones from your test nucleofection
@@ -97,7 +97,7 @@ qc$birthday$K_planned
 ## Step 3 — Combined two-library QC
 
 ```{r step3}
-combined <- run_combined_QC(
+combined <-  catcheR_step2QC_combinedQC(
   lib1_dir         = "CATCHER1_new/results/",
   lib2_dir         = "CATCHER2_new/results/",
   out_dir          = "combined_results/",
@@ -121,7 +121,7 @@ The go/no-go decision is based on two criteria:
 ## Step 4 — Publication plots
 
 ```{r step4}
-run_plasmid_plots(
+catcheR_step2QC_plots(
   results_dir = "CATCHER1_new/results/",
   DIs         = 300
 )
@@ -132,7 +132,7 @@ representation from the Python pipeline outputs.
 
 ## Understanding the birthday problem
 
-The key calculation in `run_plasmid_QC()` and `run_combined_QC()` is:
+The key calculation in `catcheR_step2QC_plasmidQC()` and `catcheR_step2QC_combinedQC()` is:
 
 > If a shRNA has **n** distinct UCIs in the library and you recover **K**
 > clones for that shRNA, some clones will share a UCI (duplicates).
