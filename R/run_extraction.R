@@ -58,7 +58,7 @@
 #' }
 #'
 #' @export
-run_extraction <- function(fastq,
+catcheR_step2QC_extraction <- function(fastq,
                             barcodes,
                             output_dir   = "results/",
                             DIs          = 300,
@@ -100,7 +100,7 @@ run_extraction <- function(fastq,
   if (!is.null(clones)) args <- c(args, "--clones", clones)
 
   message("=============================================================")
-  message("  run_extraction()")
+  message("  catcheR_step2QC_extraction()")
   message("=============================================================")
   message("  FASTQ    : ", fastq)
   message("  Barcodes : ", barcodes)
