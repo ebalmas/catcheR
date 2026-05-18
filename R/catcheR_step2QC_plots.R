@@ -34,12 +34,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' run_plasmid_plots("results/", DIs = 300)
+#' catcheR_step2QC_plots("results/", DIs = 300)
 #' }
 #'
-#' @seealso [run_extraction()], [run_plasmid_QC()]
+#' @seealso [catcheR_step2QC_extraction()], [catcheR_step2QC_plasmidQC()]
 #' @export
-run_plasmid_plots <- function(results_dir = "results/",
+catcheR_step2QC_plots <- function(results_dir = "results/",
                                DIs         = 300,
                                clones_path = NULL) {
 
