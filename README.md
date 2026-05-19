@@ -34,6 +34,8 @@ The package covers the core CATCHER workflow:
 
 ```mermaid
 flowchart TD
+    P[Colony PCR input\nSanger FASTA\nDesign Excel\nOptional ABI ZIP] --> Q[catcheR_sangerQC\nVerify BC and shRNA per colony\nbefore completing cloning]
+
     A[Step 1 input\nIntermediate plasmid FASTQ\nrc_barcodes_genes.csv\nexpected_shRNA_names.csv] --> B[catcheR_step1QC\nDetect barcode-shRNA swaps]
     B --> B1[to_scratch\nreliable_clones_swaps.csv]
 
@@ -74,7 +76,7 @@ Recommended R packages:
 ```r
 install.packages(c(
   "ggplot2", "dplyr", "tidyr", "scales", "forcats",
-  "patchwork", "data.table", "quantmod"
+  "patchwork", "data.table", "quantmod", "readxl"
 ))
 ```
 
@@ -134,6 +136,7 @@ Output/step2QC_plasmidQC/260518_step2QC_plasmidQC_CATCHER2/
 
 | Function | Purpose | Main output |
 |---|---|---|
+| `catcheR_sangerQC()` | **Colony PCR Sanger QC** — verify BC and shRNA per colony before completing intermediate plasmid cloning | Per-well pass/fail table with mutation calls and quality scores |
 | `catcheR_step1QC()` | Intermediate plasmid pool QC; detects barcode-shRNA swaps | reliable clone/swap tables and QC plots |
 | `catcheR_step2QC_extraction()` | Extracts UMI, barcode, UCI and barcode match from final-pool FASTQ | `distribution_all_clones.csv` and extraction tables |
 | `catcheR_step2QC_plasmidQC()` | Single-library final plasmid / hiPSC pool QC | shRNA representation, clone frequency plots, birthday-model estimates |
@@ -143,6 +146,90 @@ Output/step2QC_plasmidQC/260518_step2QC_plasmidQC_CATCHER2/
 | `catcheR_filtercatch()` | Filters cells to confident single-perturbation assignments | filtered silencing matrix |
 | `catcheR_nocatch()` | Processes unassigned / empty cells | complete matrix and all-sample summaries |
 | `catcheR_sortcatch()` | Corrects barcode-swap assignments using step1QC output | corrected annotated matrix |
+
+---
+
+## Colony PCR Sanger QC — before completing the intermediate cloning
+
+Use `catcheR_sangerQC()` **during the intermediate plasmid cloning stage**,
+after picking bacterial colonies from the ligation plate and before
+completing the transfer into the final backbone. This step confirms, per
+colony, that:
+
+- The insert was cloned successfully (anchor and restriction sites present).
+- The **barcode (BC)** matches the expected BC for that well in your design plate.
+- The **shRNA** sense and antisense sequences match the design, with no
+  point mutations introduced during oligo synthesis or ligation.
+- The **hairpin structure** is valid (sense = reverse complement of antisense).
+
+This is distinct from `catcheR_step1QC()`, which analyses the full
+intermediate *pool* FASTQ and works at scale. `catcheR_sangerQC()` is
+specifically for the per-colony Sanger sequencing check done on a 96-well
+plate before you invest time completing the cloning.
+
+**When to use this:**
+
+- After picking colonies from a test ligation to compare conditions (e.g.
+  1:12 vs 1:20 insert:vector ratio).
+- To confirm that at least a subset of colonies have the correct insert before
+  proceeding to pool sequencing.
+- To catch synthesis errors or unexpected sequence variants before they are
+  propagated through the library.
+
+**Required files:**
+
+```text
+<FASTA file>                  Sanger reads, one per well (headers end in _A1, _B1, etc.)
+<Design Excel>                The oligo design file used to order your library
+<ABI/PHD ZIP> (optional)      ZIP of ABI output files; enables per-base quality reporting
+```
+
+**Example:**
+
+```r
+result <- catcheR_sangerQC(
+  fasta           = "11109801799-1.fasta",
+  design_xlsx     = "EB003C_DES01_shRNA_tdark_Ligation.xlsx",
+  output_dir      = "Output/",
+  sample_name     = "plate1_ligation",
+  plate_sheet     = "Plate 01",
+  ligation_split  = 6L,                   # cols 1-6 = 1:12, cols 7-12 = 1:20
+  ligation_labels = c("1:12", "1:20"),
+  abi_zip         = "11109801799-1_SCF_SEQ_ABI.zip"
+)
+
+# View per-well results
+result$results
+
+# Summary counts per status
+result$summary
+
+# Passing wells only
+result$results[grepl("^PASS", result$results$status), ]
+
+# Reload without re-running
+result <- readRDS(
+  "Output/sangerQC/260518_sangerQC_plate1_ligation/R_objects/sangerQC_result.rds"
+)
+```
+
+**Status codes at a glance:**
+
+| Status | Meaning |
+|--------|---------|
+| `PASS` | BC and shRNA both match perfectly |
+| `PASS (1bp BC mut)` | shRNA perfect; 1 BC mismatch — likely still usable |
+| `PASS (2bp BC mut)` | shRNA perfect; 2 BC mismatches — verify BC uniqueness before using |
+| `PASS (1bp shRNA mut)` | BC perfect; 1 shRNA mismatch — check seed region |
+| `CHECK` | BC matches but shRNA has > threshold mismatches — inspect manually |
+| `INVALID HAIRPIN` | Sense ≠ RC(antisense) — do not use this colony |
+| `shRNA OK / BC WRONG` | shRNA matches but BC > 2 mm — possible synthesis error |
+| `SEQ TRUNCATED` | Read too short or insert not cloned |
+| `SEQ FAILED` | Sequencing failed |
+
+See the vignette `vignette("catcheR-sangerQC")` for full documentation
+including read orientation, anchor extraction logic, quality score
+interpretation, and all parameter options.
 
 ---
 
