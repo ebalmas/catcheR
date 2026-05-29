@@ -9,12 +9,11 @@ importFrom(ggplot2, ggplot, aes, aes_string, geom_col, geom_histogram,
            geom_text, geom_tile, geom_density, geom_boxplot, geom_jitter,
            annotate, facet_wrap, coord_polar, scale_fill_manual,
            scale_colour_manual, scale_x_continuous, scale_x_log10,
-           scale_y_continuous, scale_y_log10, scale_y_log10,
-           label_comma, label_number, label_percent, after_stat,
-           expansion, theme_classic, theme_minimal, theme, element_text,
-           element_line, element_rect, element_blank, margin, unit,
-           ggsave, vars, vars)
-importFrom(scales, label_comma, label_number, percent_format)
+           scale_y_continuous, scale_y_log10,
+           after_stat, expansion, theme_classic, theme_minimal, theme,
+           element_text, element_line, element_rect, element_blank,
+           margin, unit, ggsave, vars)
+importFrom(scales, label_comma, label_number, label_percent, percent_format)
 importFrom(forcats, fct_reorder)
 importFrom(utils, read.csv, read.delim, write.csv)
 importFrom(stats, shapiro.test, wilcox.test, median, cor)
