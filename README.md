@@ -8,6 +8,35 @@ This repository is an updated implementation of the original [`alessandro-berter
 
 ---
 
+Full dockerized version on Rstudio server is available from image hedgelab/rstudio-hedgelab:iPS2seq_CIRI_new_cellranger9
+
+To run the Docker by command line:
+```bash
+docker run -d -p 8080:8787 --privileged=true --name container_name hedgelab/rstudio-hedgelab:iPS2seq_CIRI_new_cellranger9
+docker exec -it container_name /bin/bash
+```
+
+To run the Docker in Rstudio server:
+Note that USER and PASSWORD are the credential for Rstudio
+```bash
+docker run -d -itv /path/to/shared/folder:/scratch \
+
+  --privileged=true \
+
+  -p 8080:8787 \
+
+  -e USER=rstudio \
+
+  -e PASSWORD=your_password_here \
+
+  --name container_name \
+
+  hedgelab/rstudio-hedgelab:iPS2seq_CIRI_new_cellranger9
+
+docker exec -idt container_name rstudio-server start
+```
+go on browser http://localhost:8080/ and add the credentials
+
 ## What catcheR does
 
 In iPS2-seq, each perturbation is represented by a linked molecular identity:
