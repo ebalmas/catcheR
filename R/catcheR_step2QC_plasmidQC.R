@@ -2,7 +2,6 @@
 #'
 #' Reads `distribution_all_clones.csv` from the results folder produced by
 #' [catcheR_step2QC_extraction()] and runs five analysis sections:
-#' [run_extraction()] and runs five analysis sections:
 #'
 #' 1. **Clone-level statistics** — total clones, matched %, above DIs %.
 #' 2. **TXT report** — detailed read-count breakdown saved to disk.
@@ -17,9 +16,6 @@
 #' @param results_dir      Path to the `results/` folder from [catcheR_step2QC_extraction()].
 #'   Must contain `distribution_all_clones.csv`. Default `"results/"`.
 #' @param DIs              DIs threshold — same value used in [catcheR_step2QC_extraction()].
-#' @param results_dir      Path to the `results/` folder from [run_extraction()].
-#'   Must contain `distribution_all_clones.csv`. Default `"results/"`.
-#' @param DIs              DIs threshold — same value used in [run_extraction()].
 #'   Clones with fewer reads are treated as artefacts. Default `300`.
 #' @param transfect_clones Number of clones recovered in your **test**
 #'   nucleofection experiment. Used to estimate efficiency. Default `100`.
@@ -93,18 +89,6 @@ catcheR_step2QC_plasmidQC <- function(results_dir      = "results/",
   message("  catcheR::catcheR_step2QC_plasmidQC()")
   message("=============================================================")
   message(sprintf("  Input (results_dir): %s", results_dir))
-                            DIs              = 300,
-                            transfect_clones = 100,
-                            transfect_cells  = 2000000,
-                            nucleofect_cells = 2000000) {
-
-  dir.create(results_dir, showWarnings = FALSE, recursive = TRUE)
-  eff <- transfect_clones / transfect_cells
-
-  message("=============================================================")
-  message("  catcheR::rcatcheR_step2QC_plasmidQC()")
-  message("=============================================================")
-  message(sprintf("  Results dir        : %s", results_dir))
   message(sprintf("  DIs                : %d", DIs))
   message(sprintf("  Efficiency         : %d per %s cells",
                   transfect_clones, format(transfect_cells, big.mark = ",")))
@@ -190,88 +174,6 @@ catcheR_step2QC_plasmidQC <- function(results_dir      = "results/",
   .save_plot(p_hist, dirs, paste0("clone_frequency_dist_DIs",DIs))
 
   # ── Section 4: 3-panel ────────────────────────────────────────────────────
-  # Load
-  clones <- .load_clones(results_dir)
-
-  # --- Section 1: stats -------------------------------------------------------
-  message("\n-- Section 1: clone-level statistics --")
-  s1 <- .clone_stats(clones, DIs)
-  message(sprintf("  Total: %s | Above DIs: %s (%.1f%%) | Matched: %s (%.1f%%)",
-                  format(s1$total,         big.mark = ","),
-                  format(s1$above_DIs,     big.mark = ","),
-                  s1$above_DIs / s1$total * 100,
-                  format(s1$matched,       big.mark = ","),
-                  s1$matched   / s1$total * 100))
-
-  # --- Section 2: TXT report --------------------------------------------------
-  message("\n-- Section 2: TXT report --")
-  notes_map <- c("1" = "almost certainly artefacts", "2-10" = "likely noise",
-                 "11-50" = "", "51-100" = "", "101-500" = "", "501-1,000" = "")
-  txt_out <- file.path(results_dir,
-                       paste0("DIs_threshold_stats_DIs", DIs, ".txt"))
-  sink(txt_out)
-  cat("=============================================================\n")
-  cat("  DIs THRESHOLD STATISTICS\n")
-  cat("=============================================================\n")
-  cat(sprintf("  DIs threshold  : %s reads\n", format(DIs, big.mark = ",")))
-  cat("-------------------------------------------------------------\n\n")
-  cat("OVERVIEW\n")
-  cat(sprintf("  Total clones         : %s\n",  format(s1$total,         big.mark=",")))
-  cat(sprintf("  Matched barcodes     : %s  (%.1f%%)\n",
-              format(s1$matched,   big.mark=","), s1$matched   / s1$total * 100))
-  cat(sprintf("  Unmatched            : %s  (%.1f%%)\n",
-              format(s1$unmatched, big.mark=","), s1$unmatched / s1$total * 100))
-  cat(sprintf("  Below DIs (< %s)    : %s  (%.1f%%)  -- filtered out\n",
-              format(DIs, big.mark=","),
-              format(s1$below_DIs, big.mark=","), s1$below_DIs / s1$total * 100))
-  cat(sprintf("  Above DIs (>= %s)   : %s  (%.1f%%)  -- kept\n",
-              format(DIs, big.mark=","),
-              format(s1$above_DIs, big.mark=","), s1$above_DIs / s1$total * 100))
-  cat(sprintf("    of which matched   : %s  (%.1f%%)\n",
-              format(s1$above_matched, big.mark=","),
-              s1$above_matched / s1$above_DIs * 100))
-  cat("\n-------------------------------------------------------------\n")
-  cat("READ COUNT BREAKDOWN\n\n")
-  cat(sprintf("  %-20s  %10s  %7s  %s\n",
-              "Read count range", "Clones", "%", "Notes"))
-  cat(sprintf("  %s\n", strrep("-", 60)))
-  for (i in seq_len(nrow(s1$bc))) {
-    lbl  <- as.character(s1$bc$bucket[i])
-    note <- ifelse(lbl %in% names(notes_map), notes_map[[lbl]], "")
-    cat(sprintf("  %-20s  %10s  %6.1f%%  %s\n",
-                lbl, format(s1$bc$n_clones[i], big.mark = ","),
-                s1$bc$pct[i], note))
-  }
-  cat("\n=============================================================\n")
-  sink()
-  message("  Saved: DIs_threshold_stats_DIs", DIs, ".txt")
-
-  # --- Section 3: histogram ---------------------------------------------------
-  message("\n-- Section 3: clone frequency histogram --")
-  cl3 <- s1$clones %>%
-    dplyr::mutate(match_status = dplyr::if_else(
-      name == "UNMATCHED", "Unmatched", "Matched"))
-  p3 <- ggplot2::ggplot(cl3, ggplot2::aes(x = Freq, fill = match_status)) +
-    ggplot2::geom_histogram(ggplot2::aes(y = ggplot2::after_stat(count)),
-                            bins = 60, colour = NA, alpha = 0.9) +
-    ggplot2::geom_vline(xintercept = DIs, colour = "#D85A30",
-                        linewidth = 0.8, linetype = "dashed") +
-    ggplot2::annotate("text", x = DIs * 1.15, y = Inf,
-                      label = paste0("DIs = ", format(DIs, big.mark = ",")),
-                      hjust = 0, vjust = 1.5, size = 3.5, colour = "#D85A30") +
-    ggplot2::scale_x_log10(labels = scales::label_comma(),
-                            breaks = 10^(0:6)) +
-    ggplot2::scale_y_log10(labels = scales::label_comma()) +
-    ggplot2::scale_fill_manual(
-      values = c("Matched" = "#378ADD", "Unmatched" = "#B4B2A9"), name = NULL) +
-    ggplot2::labs(x = "Reads per clone", y = "Number of clones (log scale)",
-                  title = paste0("Clone frequency distribution  (DIs=", DIs, ")")) +
-    ggplot2::theme_minimal(base_size = 13) +
-    ggplot2::theme(legend.position = "top",
-                   plot.caption = ggplot2::element_text(colour = "grey50"))
-  .save_plot(p3, results_dir, paste0("clone_frequency_dist_DIs", DIs))
-
-  # --- Section 4: 3-panel -----------------------------------------------------
   message("\n-- Section 4: shRNA representation 3-panel --")
   above <- s1$clones %>% dplyr::filter(Freq >= DIs, name != "UNMATCHED")
   shrna <- .shrna_agg(above)
@@ -322,58 +224,6 @@ catcheR_step2QC_plasmidQC <- function(results_dir      = "results/",
     p_3panel <- (p_A | p_B | p_C) +
       patchwork::plot_annotation(
         title    = paste0("shRNA library representation  (DIs=",DIs,")"),
-  wx_uci   <- stats::wilcox.test(shrna$pct_UCI,   mu = 100 / N)
-  wx_reads <- stats::wilcox.test(shrna$pct_reads, mu = 100 / N)
-
-  fill_col <- "#BA7517"
-  bt <- .base_theme()
-
-  make_hist_panel <- function(vals, total_n, x_lab, title_letter,
-                               norm_p, med_p, bw = 0.5) {
-    df <- data.frame(x = vals)
-    ggplot2::ggplot(df, ggplot2::aes(x = x)) +
-      ggplot2::geom_histogram(
-        ggplot2::aes(y = ggplot2::after_stat(count) / total_n * 100),
-        binwidth = bw, fill = fill_col, colour = NA, boundary = 0) +
-      ggplot2::geom_vline(xintercept = stats::median(vals),
-                          linetype = "dashed", linewidth = 0.6) +
-      ggplot2::annotate("text", x = max(vals) * 0.6, y = Inf,
-                        vjust = 1.5, hjust = 0, size = 3, colour = "grey30",
-                        lineheight = 1.3,
-                        label = paste0("Normality\n", norm_p,
-                                       "\n\nMedian\n", med_p)) +
-      ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.02))) +
-      ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.06))) +
-      ggplot2::labs(x = x_lab, y = "% of shRNAs", title = title_letter) + bt
-  }
-
-  p_A <- make_hist_panel(shrna$pct_UCI, N, "% of UCIs per shRNA",
-                          "A", .fmt_p(sw_uci$p.value),   .fmt_p(wx_uci$p.value))
-  p_B <- ggplot2::ggplot(shrna, ggplot2::aes(x = n_UCI)) +
-    ggplot2::geom_histogram(
-      ggplot2::aes(y = ggplot2::after_stat(count) / N * 100),
-      binwidth = 2, fill = fill_col, colour = NA, boundary = 0.5) +
-    ggplot2::geom_vline(xintercept = stats::median(shrna$n_UCI),
-                        linetype = "dashed", linewidth = 0.6) +
-    ggplot2::annotate("text", x = max(shrna$n_UCI) * 0.6, y = Inf,
-                      vjust = 1.5, hjust = 0, size = 3, colour = "grey30",
-                      lineheight = 1.3,
-                      label = paste0("Normality\n", .fmt_p(sw_n$p.value),
-                                     sprintf("\n\nMedian: %g UCIs",
-                                             stats::median(shrna$n_UCI)))) +
-    ggplot2::scale_x_continuous(
-      breaks = seq(0, max(shrna$n_UCI) + 2, by = 4),
-      expand = ggplot2::expansion(mult = c(0, 0.02))) +
-    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.06))) +
-    ggplot2::labs(x = "Number of UCIs per shRNA", y = "% of shRNAs",
-                  title = "B") + bt
-  p_C <- make_hist_panel(shrna$pct_reads, N, "% of reads per shRNA",
-                          "C", .fmt_p(sw_reads$p.value), .fmt_p(wx_reads$p.value))
-
-  if (requireNamespace("patchwork", quietly = TRUE)) {
-    combined <- (p_A | p_B | p_C) +
-      patchwork::plot_annotation(
-        title    = paste0("shRNA library representation  (DIs=", DIs, ")"),
         subtitle = sprintf("%d shRNAs | %d UCIs | mean=%.1f | median=%.0f",
                            N, sum(shrna$n_UCI), mean(shrna$n_UCI),
                            stats::median(shrna$n_UCI)),
@@ -418,63 +268,6 @@ catcheR_step2QC_plasmidQC <- function(results_dir      = "results/",
               r$p_recover_mean, r$pct_shrnas_ok, r$verdict))
   }
   .save_stats(b_lines, dirs, paste0("UCI_birthday_analysis_DIs",DIs))
-          plot.title    = ggplot2::element_text(size = 13, face = "plain"),
-          plot.subtitle = ggplot2::element_text(size = 10, colour = "grey50")))
-    .save_plot(combined, results_dir,
-               paste0("shrna_representation_3panel_DIs", DIs), w = 18, h = 5)
-  } else {
-    message("  Install patchwork for the combined 3-panel figure:")
-    message("  install.packages('patchwork')")
-    for (pp in list(list(p = p_A, n = paste0("shrna_rep_A_DIs", DIs)),
-                    list(p = p_B, n = paste0("shrna_rep_B_DIs", DIs)),
-                    list(p = p_C, n = paste0("shrna_rep_C_DIs", DIs))))
-      .save_plot(pp$p, results_dir, pp$n, w = 7, h = 5)
-  }
-
-  # --- Section 5: birthday ----------------------------------------------------
-  message("\n-- Section 5: birthday problem analysis --")
-  b <- .birthday_results(shrna, N, DIs, eff,
-                          nucleofect_cells, transfect_clones, transfect_cells)
-
-  # Write birthday TXT
-  txt_b <- file.path(results_dir,
-                     sprintf("UCI_birthday_analysis_DIs%d.txt", DIs))
-  sink(txt_b)
-  cat("=============================================================\n")
-  cat("  UCI UNIQUENESS ANALYSIS - BIRTHDAY PROBLEM\n")
-  cat("=============================================================\n")
-  cat(sprintf("  Efficiency        : %d per %s cells\n",
-              transfect_clones, format(transfect_cells, big.mark = ",")))
-  cat(sprintf("  Planned nucleofection : %s cells\n",
-              format(nucleofect_cells, big.mark = ",")))
-  cat(sprintf("  Expected K/shRNA  : %.2f clones\n", b$K_planned))
-  cat(sprintf("  Library           : %d shRNAs, mean=%.1f UCIs\n\n",
-              N, mean(shrna$n_UCI)))
-  cat("RESULTS PER TARGET m\n\n")
-  cat(sprintf("  %-4s  %-6s  %-10s  %-8s  %-12s  %-13s  %s\n",
-              "m", "K", "cells(M)", "% dup", "P(>=m UCI)", "% shRNAs OK",
-              "verdict"))
-  cat(sprintf("  %s\n", strrep("-", 72)))
-  for (i in seq_len(nrow(b$results))) {
-    r <- b$results[i, ]
-    cat(sprintf("  %-4d  %-6d  %-10.1f  %-7.1f%%  %-11.1f%%  %-12.1f%%  %s\n",
-                r$m_target, r$K, r$cells_M, r$pct_dup_mean,
-                r$p_recover_mean, r$pct_shrnas_ok, r$verdict))
-  }
-  cat("\n-------------------------------------------------------------\n")
-  cat("PER-shRNA TABLE\n\n")
-  cat(sprintf("  %-14s %-10s %6s %8s %10s  %s\n",
-              "shRNA", "gene", "n_UCI", "% dup", "E[distinct]", "status"))
-  cat(sprintf("  %s\n", strrep("-", 62)))
-  for (i in seq_len(nrow(b$shrna %>% dplyr::arrange(n_UCI)))) {
-    r <- (b$shrna %>% dplyr::arrange(n_UCI))[i, ]
-    cat(sprintf("  %-14s %-10s %6d %7.1f%% %10.2f  %s\n",
-                r$name, r$gene, r$n_UCI,
-                r$pct_dup_planned, r$exp_distinct_plan, r$dup_status))
-  }
-  cat("\n=============================================================\n")
-  sink()
-  message("  Saved: UCI_birthday_analysis_DIs", DIs, ".txt")
 
   # Birthday plots
   rp <- b$results %>%
