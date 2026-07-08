@@ -182,6 +182,15 @@ catcheR_sangerQC <- function(fasta,
     sum(a_ch[seq_len(l)] != b_ch[seq_len(l)])
   }
 
+  .hamming_sense <- function(found, design_sense, n = 21L) {
+    mm1 <- .hamming(found, design_sense, n)
+    if (nchar(design_sense) > n) {
+      mm2 <- .hamming(found, substr(design_sense, 2L, nchar(design_sense)), n)
+      return(min(mm1, mm2))
+    }
+    mm1
+  }
+
   .find_fuzzy <- function(seq, pattern, max_mm = 2L) {
     plen <- nchar(pattern)
     slen <- nchar(seq)
@@ -448,8 +457,8 @@ catcheR_sangerQC <- function(fasta,
     shrna_best_idx <- NA_integer_; shrna_best_mm <- 999L
     if (nchar(sense_found) >= 10) {
       for (i in seq_len(nrow(design))) {
-        mm <- .hamming(sense_found, design$sense[i]) +
-              .hamming(anti_found,  design$anti[i],  21L)
+        mm <- .hamming_sense(sense_found, design$sense[i]) +
+      .hamming(anti_found, design$anti[i], 21L)
         if (mm < shrna_best_mm) { shrna_best_mm <- mm; shrna_best_idx <- i }
       }
     }
@@ -467,10 +476,16 @@ catcheR_sangerQC <- function(fasta,
       r$assigned_oligo_well <- design$oligo_well[shrna_best_idx]
       r$exp_bc_in_read      <- design$bc_in_read[shrna_best_idx]
       r$bc_mm  <- .hamming(bc_found, design$bc_in_read[shrna_best_idx], 8L)
-      r$sense_mm <- .hamming(sense_found, design$sense[shrna_best_idx], 21L)
+      r$sense_mm <- .hamming_sense(sense_found, design$sense[shrna_best_idx])
       r$anti_mm  <- .hamming(anti_found,  design$anti[shrna_best_idx],  21L)
       r$bc_mutations    <- .mut_list(bc_found, design$bc_in_read[shrna_best_idx])
-      r$sense_mutations <- .mut_list(sense_found, design$sense[shrna_best_idx])
+      sense_for_mut <- design$sense[shrna_best_idx]
+if (nchar(sense_for_mut) > 21L &&
+    .hamming(sense_found, substr(sense_for_mut, 2L, nchar(sense_for_mut)), 21L) 
+    .hamming(sense_found, sense_for_mut, 21L)) {
+  sense_for_mut <- substr(sense_for_mut, 2L, nchar(sense_for_mut))
+}
+r$sense_mutations <- .mut_list(sense_found, sense_for_mut)
       r$anti_mutations  <- .mut_list(anti_found,  design$anti[shrna_best_idx])
     }
 
