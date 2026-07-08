@@ -480,12 +480,12 @@ catcheR_sangerQC <- function(fasta,
       r$anti_mm  <- .hamming(anti_found,  design$anti[shrna_best_idx],  21L)
       r$bc_mutations    <- .mut_list(bc_found, design$bc_in_read[shrna_best_idx])
       sense_for_mut <- design$sense[shrna_best_idx]
-if (nchar(sense_for_mut) > 21L &&
-    .hamming(sense_found, substr(sense_for_mut, 2L, nchar(sense_for_mut)), 21L) 
-    .hamming(sense_found, sense_for_mut, 21L)) {
-  sense_for_mut <- substr(sense_for_mut, 2L, nchar(sense_for_mut))
-}
-r$sense_mutations <- .mut_list(sense_found, sense_for_mut)
+      if (nchar(sense_for_mut) > 21L &&
+          .hamming(sense_found, substr(sense_for_mut, 2L, nchar(sense_for_mut)), 21L) <
+          .hamming(sense_found, sense_for_mut, 21L)) {
+        sense_for_mut <- substr(sense_for_mut, 2L, nchar(sense_for_mut))
+      }
+      r$sense_mutations <- .mut_list(sense_found, sense_for_mut)
       r$anti_mutations  <- .mut_list(anti_found,  design$anti[shrna_best_idx])
     }
 
