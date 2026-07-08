@@ -125,8 +125,8 @@ catcheR_sangerQC <- function(fasta,
                               output_dir       = "Output/",
                               sample_name      = NULL,
                               plate_sheet      = "Plate 01",
-                              oligo_col        = 2L,
-                              sequence_col     = 4L,
+                              oligo_col        = 1L,
+                              sequence_col     = 3L,
                               first_row        = 8L,
                               last_row         = 67L,
                               ligation_split   = 6L,
@@ -265,9 +265,9 @@ catcheR_sangerQC <- function(fasta,
 
   for (i in seq_len(nrow(oligo_rows))) {
     row  <- oligo_rows[i, ]
-    well <- trimws(as.character(row[[2]]))   # col index 2 = position column
-    nm   <- trimws(as.character(row[[oligo_col + 1L]]))
-    top  <- trimws(toupper(as.character(row[[sequence_col + 1L]])))
+    well <- trimws(as.character(row[[1]]))   # col index 2 = position column
+    nm   <- trimws(as.character(row[[oligo_col + 1L]])) #oligo name
+    top  <- trimws(toupper(as.character(row[[sequence_col + 1L]]))) #sequence
 
     if (is.na(well) || well == "NA" || nchar(well) == 0) next
     if (is.na(nm)   || nm   == "NA" || nchar(nm)   == 0) next
