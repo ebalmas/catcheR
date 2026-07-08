@@ -62,7 +62,7 @@ Install from GitHub:
 
 ```r
 install.packages("devtools")
-devtools::install_github("ebalmas/catcheR")
+devtools::install_github("ebalmas/catcheR", ref = "V3")
 ```
 
 Load the package:
