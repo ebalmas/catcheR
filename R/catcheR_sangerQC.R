@@ -426,7 +426,7 @@ catcheR_sangerQC <- function(fasta,
       sense_found <- ""; anti_found <- ""
       r$hairpin_ok <- NA
     } else {
-      xho_abs  <- sal_end + xho_pos[1] - 2L  # absolute pos of CTCGAG in seq (start)
+      xho_abs  <- sal_end + xho_pos[1] - 1L  # absolute pos of CTCGAG in seq (start)
       raw_after <- substr(seq, sal_end, xho_abs - 1L)
       sense_found <- sub("^A+", "", raw_after)   # strip leading A's (polyA)
       anti_end    <- xho_abs + 5L + nchar(sense_found)
@@ -448,7 +448,7 @@ catcheR_sangerQC <- function(fasta,
     shrna_best_idx <- NA_integer_; shrna_best_mm <- 999L
     if (nchar(sense_found) >= 10) {
       for (i in seq_len(nrow(design))) {
-        mm <- .hamming(sense_found, design$sense[i], 21L) +
+        mm <- .hamming(sense_found, design$sense[i]) +
               .hamming(anti_found,  design$anti[i],  21L)
         if (mm < shrna_best_mm) { shrna_best_mm <- mm; shrna_best_idx <- i }
       }
