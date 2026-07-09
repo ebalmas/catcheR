@@ -13,17 +13,12 @@ knitr::opts_chunk$set(eval = FALSE, echo = TRUE)
 
 ## Where this step fits in the CATCHER workflow
 
-The CATCHER cloning strategy proceeds in two stages:
+The CATCHER cloning strategy proceeds by checking the intermediate plasmid library:
 
-1. **Intermediate plasmid** — the shRNA hairpin, poly-T tail, and barcode
+**Intermediate plasmid** — the shRNA hairpin, poly-T tail, and barcode
    (BC) are assembled into the intermediate plasmid backbone. At this stage
    the read contains *both* the shRNA sequence *and* the BC, which makes it
    possible to confirm that each BC is linked to the intended shRNA.
-
-2. **Final plasmid** — the intermediate insert is transferred into the final
-   AAV/lentiviral backbone. After this step only the BC is accessible by
-   Sanger sequencing from the standard colony-PCR primers; the shRNA
-   sequence is confirmed indirectly through the BC.
 
 `catcheR_sangerQC()` is used **at the intermediate plasmid stage**, before
 the final cloning step is complete. You pick bacterial colonies from the
